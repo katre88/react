@@ -475,6 +475,28 @@ describe('Sheet', () => {
     }
   );
 
+  it('blocks a native drag only while the sheet is pressed for dragging', () => {
+    render(
+      <Sheet defaultOpen>
+        <Sheet.Content snapPoints={[0.4, 0.9]}>
+          <Sheet.Body>Body</Sheet.Body>
+        </Sheet.Content>
+      </Sheet>
+    );
+    const handle = document.querySelector('[data-name="sheet-handle"]') as HTMLElement;
+    const body = screen.getByText('Body');
+    const pointer = { pointerId: 1, pointerType: 'mouse', buttons: 1 };
+    const isNativeDragBlocked = (element: HTMLElement) => !fireEvent.dragStart(element);
+
+    expect(isNativeDragBlocked(body)).toBe(false);
+
+    fireEvent.pointerDown(handle, { ...pointer, clientY: 100 });
+    expect(isNativeDragBlocked(handle)).toBe(true);
+
+    fireEvent.pointerUp(handle, { ...pointer, clientY: 100 });
+    expect(isNativeDragBlocked(body)).toBe(false);
+  });
+
   it.each([false, true])('clears a drag across close and reopen with keepMounted=%s', async (keepMounted) => {
     render(
       <Sheet>

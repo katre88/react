@@ -3,6 +3,7 @@ import cn from 'classnames';
 import {
   ComponentProps,
   CSSProperties,
+  DragEvent as ReactDragEvent,
   PointerEvent as ReactPointerEvent,
   ReactNode,
   useCallback,
@@ -322,6 +323,11 @@ export const SheetContent = (props: SheetContentProps): JSX.Element | null => {
     if (dragRef.current?.pointerId === event.pointerId) resetDrag();
   };
 
+  // A press on selected content starts a native drag, which cancels the pointer and ends the sheet drag.
+  const preventNativeDrag = (event: ReactDragEvent<HTMLDivElement>) => {
+    if (dragRef.current) event.preventDefault();
+  };
+
   if (!isMounted && !keepMounted) return null;
 
   const panelClassName = cn(
@@ -399,6 +405,7 @@ export const SheetContent = (props: SheetContentProps): JSX.Element | null => {
               onPointerCancel: handleDragCancel,
               onLostPointerCapture: handleDragCancel,
               onContextMenu: resetDrag,
+              onDragStart: preventNativeDrag,
             })}
             data-status={status}
           >
